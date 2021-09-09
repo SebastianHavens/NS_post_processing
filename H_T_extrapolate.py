@@ -4,7 +4,7 @@ import numpy as np
 import sys
 
 
-analyse_file = 'pf-short'
+analyse_file = 'pf'
 energy_file  = sys.argv[1]
 ke_file      = sys.argv[2]
 
@@ -22,7 +22,6 @@ for f in range(len(U) -1 ) :
 
 deriv = deriv / (len(U) -1)
 const = abs(U[1] * deriv)
-print('constant' +str(const))
 h_temp = open('temp.temp', 'w')
 for f in range(len(energy) ) :
     h_temp.write(str(( ( (energy[f] - ke[f]) * deriv) + const )) + '\n')
