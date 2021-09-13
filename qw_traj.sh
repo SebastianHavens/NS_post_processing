@@ -27,7 +27,7 @@ do
 	grep -o ns_KE=.[[:digit:]]*\.[[:digit:]]* $1.traj.$iter.extxyz | sed "s/ns_KE=//g" >> $1.ke_temp
 	
 	
-	./H_T_extrapolate.py $1.ener_temp $1.ke_temp
+	H_T_extrapolate.py $1.ener_temp $1.ke_temp
 	
 	#grep the energies, volume, Q and W data from the two files and create a summary result file, neatly arranging them by columns
 	pr -m -t -s $1.ener_temp $1.vol_temp $1.qw4_temp $1.qw6_temp $1.iter_temp temp.temp U.temp| awk '{print $1,$2,$3,$4,$5,$6,$7,$8, $9 }' >> $1-$2-$3.qw46HV
