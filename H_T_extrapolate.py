@@ -4,7 +4,7 @@ import numpy as np
 import sys
 from scipy import interpolate
 
-analyse_file = 'analyse.dat'
+analyse_file = 'pf'
 energy_file  = sys.argv[1]
 ke_file      = sys.argv[2]
 
