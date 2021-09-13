@@ -2,9 +2,9 @@
 
 import numpy as np
 import sys
+from scipy import interpolate
 
-
-analyse_file = 'pf'
+analyse_file = 'analyse.dat'
 energy_file  = sys.argv[1]
 ke_file      = sys.argv[2]
 
@@ -13,15 +13,22 @@ try:
 except:
     print('pf does not exit')
     exit()
+
 energy = np.loadtxt(str(energy_file))
 ke     = np.loadtxt(str(ke_file))
 
-deriv=0
-for f in range(len(U) -1 ) :
-    deriv += (T[f+1] - T[f]) / (U[f+1] - U[f])
+U2=[]
+for x in range(len(energy)):
+    U2.append(energy[x] - ke[x])
 
-deriv = deriv / (len(U) -1)
-const = abs(U[1] * deriv)
+U2 = np.delete(U2, np.argwhere(U2 > np.amax(U)))
+U2 = np.delete(U2, np.argwhere(U2 < np.amin(U)))
+
+f = interpolate.interp1d(U,T)
+
+
 h_temp = open('temp.temp', 'w')
-for f in range(len(energy) ) :
-    h_temp.write(str(( ( (energy[f] - ke[f]) * deriv) + const )) + '\n')
+h_U = open('U.temp', 'w')
+for x in range(len(U2) ) :
+    h_temp.write(str(f(U2[x])) +  '\n')
+    h_U.write(str(U2[x]) +'\n')
