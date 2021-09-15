@@ -22,10 +22,10 @@ U2=[]
 for x in range(len(energy)):
     U2.append(energy[x] - ke[x])
 
-U2 = np.delete(U2, np.argwhere(U2 > np.amax(U)))
-U2 = np.delete(U2, np.argwhere(U2 < np.amin(U)))
+#U2 = np.delete(U2, np.argwhere(U2 > np.amax(U)))
+#U2 = np.delete(U2, np.argwhere(U2 < np.amin(U)))
 
-f = interpolate.interp1d(U,T)
+f = interpolate.interp1d(U,T, fill_value='extrapolate')
 
 h_temp = open('temp.temp', 'w')
 for x in range(len(U2)) :
