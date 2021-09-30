@@ -3,15 +3,32 @@
 #files need: .energies
 #            .traj 
 
-#  argument 1 = charactrers before .traj #This will also be prefix of energies file
+#  argument 1 = charactrers before .traj 
 #  argument 2 = character after traj.   #this is the processer number first processor you want to analyse
 #  argument 3 = last processor number you want to analyse
+#  argument  4 = start temperature
+#  argument  5 = Number of temperatures
+#  argument  6 - difference between temperatures
+
+if [ $# -ne 6 ]; then
+    echo "Not all arguments provided"
+    echo ""
+    echo "  argument  1 = charactrers before .traj "
+    echo "  argument  2 = character after traj.   #this is the processer number first processor you want to analyse"
+    echo "  argument  3 = last processor number you want to analyse"
+    echo "  argument  4 = start temperature"
+    echo "  argument  5 = Number of temperatures"
+    echo "  argument  6 = difference between temperatures"
+    exit 1
+fi
+
+
 mkdir qw46
 mkdir rdf
 
 
-ns_analyse $1.energies -M 0.1 -n 500 -D 5 > analyse.dat
-echo 'Energy:    Volume:    q4:      w4:    q6:    w6:  iteration:   Temp:  U:' > $1-$2-$3.
+ns_analyse $1.energies -M $4 -n $5 -D $6 > analyse.dat
+echo 'Energy:    Volume:    q4:      w4:    q6:    w6:  iteration:   Temp:  U:' > $1-$2-$3.qw46HV
 for iter in $(seq $2 $3)
 do	
 	echo 'Processor number:'  $iter
@@ -52,13 +69,14 @@ done
 
 
 
-weighted_rdf.py $1 $2 $3
+weighted_rdf.py $1 $2 $3 $4 $5 $6 
 
 
 mv *.qw4 qw46
 mv *.qw6 qw46
 mv *.idx qw46
 rm *_temp
+rm foo
 mv qw4_$1.traj.*.extxyz qw46
 mv qw6_$1.traj.*.extxyz qw46
 mv allrdf.*.out rdf

@@ -8,16 +8,16 @@ import sys
 prefix     = sys.argv[1]
 traj_start = int(sys.argv[2])
 traj_end   = int(sys.argv[3])
+start_temp = int(sys.argv[4])
+n_temp     = int(sys.argv[5])
+delta_temp = int(sys.argv[6])
 
 
+n_walker_line = np.loadtxt(str(prefix) + '.energies', usecols=0)
+n_walkers    = n_walker_line[0]
 
-n_point      = 1120
-n_temp       = 200
-start_temp   = 1000
-delta_temp   = 10
 #kB           = 6.3336374823584e-6 # in Rydberg/K
 kB           = 8.617385e-5 #eV/K
-n_walkers    = 500
 
 
 T = [start_temp]
