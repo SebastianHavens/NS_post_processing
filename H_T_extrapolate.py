@@ -11,10 +11,7 @@ ke_file      = sys.argv[3]
 try:
     T, U = np.loadtxt(str(analyse_file), comments='#', usecols=(0,3), unpack=True)
 except:
-<<<<<<< HEAD
-=======
     print('analysis file does not exist')
->>>>>>> main
     exit()
 
 energy = np.loadtxt(str(energy_file))
@@ -25,13 +22,10 @@ U2=[]
 for x in range(len(energy)):
      U2.append(energy[x])
 
-<<<<<<< HEAD
-
 f = interpolate.interp1d(U,T, fill_value='extrapolate')
-=======
->>>>>>> main
-
 
 h_temp = open('temp.temp', 'w')
+h_U = open('U.temp', 'w')
 for x in range(len(U2)) :
     h_temp.write(str(f(U2[x])) +  '\n')
+    h_U.write(str(U2[x]) +'\n')
