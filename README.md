@@ -7,6 +7,11 @@ This package is for carrying out post processing of nested sampling calculations
 ```NS_post.input``` is where all parameters are located which may need changing for your system.
 Once you have made the changes you need, start the post processing with ```./NS_post.sh```
 
+This package will calculate:
+- Nested sampling weighted RDF
+- Temperature weighted bond order parameters
+- Partition function
+
 
 **System requirements:**
 
