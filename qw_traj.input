@@ -1,0 +1,26 @@
+# input file for qw_traj.sh
+
+
+# Selecting which files to use:
+
+prefix='64Cu'       # what comes before .traj. in your nested sampling output scripts
+proc_start=0        # This is the number of the processor output you want to analyse first
+proc_end=0          # Last processor you want to analyse
+
+# Choosing ns_analyse parameters:
+
+start_temp=0.1      # Start temperature
+num_temp=100        # Number of temperatures
+delta_temp=25       # Difference between temperatures
+
+# Uncomment the correct boltzmann constant
+
+#boltz_const=$(echo 1.380649*10^23  | bc)  # Boltzmann constant  J/K
+boltz_const=1.0
+
+
+# Calculating RDF parameters:
+
+atom_type='Cu'      # Atom type you want to calculate the RDF, use elemental symbol.
+rdf_r_cut=4.0       # RDF cutoff distance
+bin_width=0.02      # Width of bins used to calculate the RDF

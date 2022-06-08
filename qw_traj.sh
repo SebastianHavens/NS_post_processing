@@ -1,85 +1,92 @@
 #!/bin/bash
 
-#files need: .energies
-#            .traj 
-
-#  argument 1 = characters before .traj
-#  argument 2 = character after traj.   #this is the processor number first processor you want to analyse
-#  argument 3 = last processor number you want to analyse
-#  argument  4 = start temperature
-#  argument  5 = Number of temperatures
-#  argument  6 - difference between temperatures
-
-
-if [ $# -lt 6 ]; then
-    echo "Not all arguments provided"
-    echo ""
-    echo "  argument  1 = characters before .traj "
-    echo "  argument  2 = character after traj.   #this is the processor number first processor you want to analyse"
-    echo "  argument  3 = last processor number you want to analyse"
-    echo "  argument  4 = start temperature"
-    echo "  argument  5 = Number of temperatures"
-    echo "  argument  6 = difference between temperatures"
-    echo "  argument  7 = optional, -k value"
-    exit 1
-fi
+source qw_traj.input
 
 
 mkdir qw46
 mkdir rdf
 
 
-if [ -z "$7" ]
-  then
-    ns_analyse "$1".energies -M "$4" -n "$5" -D "$6" > analyse.dat
-  else
-     ns_analyse "$1".energies -M "$4" -n "$5" -D "$6" -k "$7" > analyse.dat
-fi
+
+ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -k "$boltz_const" > analyse.dat
 
 
-echo 'Energy:    Volume:    q4:      w4:    q6:    w6:  iteration:   Temp:  U:' > $1-$2-$3.qw46HV
-for iter in $(seq "$2" "$3")
-do	
+
+echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > $prefix-$proc_start-$proc_end.qw46HV
+
+#expr "$proc_end" - "$proc_start" + 1 >> nw.dat
+for iter in $(seq "$proc_start" "$proc_end")
+do
+  echo $prefix.traj.$iter.extxyz >> nw.dat
 	echo 'Processor number:'  $iter
-	get_qw atfile_in=$1.traj.$iter.extxyz r_cut=3 l=4 calc_QWave=T print_QWxyz=T  > $1.traj.$iter.qw4
-	get_qw atfile_in=$1.traj.$iter.extxyz r_cut=3 l=6 calc_QWave=T print_QWxyz=T > $1.traj.$iter.qw6
+	get_qw atfile_in=$prefix.traj.$iter.extxyz r_cut=3 l=4 calc_QWave=T print_QWxyz=T  > $prefix.traj.$iter.qw4
+	get_qw atfile_in=$prefix.traj.$iter.extxyz r_cut=3 l=6 calc_QWave=T print_QWxyz=T > $prefix.traj.$iter.qw6
 	
 	#Extract data lines from QW output
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $1.traj.$iter.qw4 > $1.qw4_temp
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $1.traj.$iter.qw6 > $1.qw6_temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $prefix.traj.$iter.qw4 > $prefix.qw4_temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $prefix.traj.$iter.qw6 > $prefix.qw6_temp
 	
-	tail -n+12 $1.traj.$iter.qw4 | head -n-3 > $1.qw4_temp
-	tail -n+12 $1.traj.$iter.qw6 | head -n-3 > $1.qw6_temp
+	tail -n+12 $prefix.traj.$iter.qw4 | head -n-3 > $prefix.qw4_temp
+	tail -n+12 $prefix.traj.$iter.qw6 | head -n-3 > $prefix.qw6_temp
 	
 	# grep the energies, ke,  volumes and iteration numbers from the traj files in neat columns and creat temporary files:
-	grep -o "ns_energy=.[[:digit:]]*\.[[:digit:]]*" $1.traj.$iter.extxyz | sed "s/ns_energy=//g" >> $1.$iter.ener_temp
-	grep -o "volume=.[[:digit:]]*\.[[:digit:]]*" $1.traj.$iter.extxyz | sed "s/volume=//g" >> $1.$iter.vol_temp
-	grep -o "iter=.[[:digit:]]*" "$1".traj."$iter".extxyz | sed "s/iter=//g" >> $1.$iter.iter_temp
-	grep -o "ns_KE=.[[:digit:]]*\.[[:digit:]]*" $1.traj.$iter.extxyz | sed "s/ns_KE=//g" >> $1.$iter.ke_temp
-	
-	./H_T_extrapolate.py analyse.dat "$1".$iter.ener_temp "$1".$iter.ke_temp
+	grep -o "ns_energy=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_energy=//g" >> "$prefix"_"$iter"_ener_temp
+	grep -o "volume=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/volume=//g" >> "$prefix"."$iter".vol_temp
+	grep -o "iter=.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/iter=//g" >> "$prefix"_"$iter"_iter_temp
+	grep -o "ns_KE=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_KE=//g" >> "$prefix"_"$iter"_ke_temp
+
+	./H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener_temp "$prefix"_"$iter"_ke_temp
 	
 	#grep the energies, volume, Q and W data from the two files and create a summary result file, neatly arranging them by columns
-	pr -m -t -s $1.$iter.ener_temp $1.$iter.vol_temp $1.qw4_temp $1.qw6_temp $1.$iter.iter_temp temp.temp U.temp| awk '{print $1,$2,$3,$4,$5,$6,$7,$8, $9 }' >> $1-$2-$3.qw46HV
+	pr -m -t -s $prefix_$iter_ener_temp $prefix.$iter.vol_temp $prefix.qw4_temp $prefix.qw6_temp $prefix_$iter_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> $prefix-$proc_start-$proc_end.qw46HV
+
+
+
+	rdf xyzfile=$prefix.traj.$iter.extxyz datafile=foo mask1="$atom_type" mask2="$atom_type" r_cut=$rdf_r_cut bin_width="$bin_width"
+
+  # Collate files for weighted RDF
+  echo "Now catting"
+	cat allrdf.out >> collated_rdf.temp
+	cat "$prefix"_"$iter"_ener_temp >> collated_ener.temp
+	cat "$prefix"_"$iter"_iter_temp >> collated_iter.temp
+	echo "finished catting"
+
+	mv allrdf.out  allrdf.$iter.out
 
 	# remove the temporary files
-	rm $1.qw4_temp
-	rm $1.qw6_temp
+	rm $prefix.qw4_temp
+	rm $prefix.qw6_temp
 	rm temp.temp
 	rm U.temp
 
-
-	rdf xyzfile=$1.traj.$iter.extxyz datafile=foo mask1=Cu mask2=Cu
-	mv allrdf.out  allrdf.$iter.out
-	
 done
-./weighted_rdf.py $1 $2 $3 $4 $5 $6
 
+
+# Merge column in each file to one file with 2 columns for weighted RDf.
+paste collated_iter.temp collated_ener.temp > collated_iter_ener.temp
+
+
+# Grabs the first word of the first line of the energies file - the number of walkers
+n_walkers=$(cut -d' ' -f1 $prefix.energies | head -1)
+
+# Calculate number of RDF bins
+n_rdf_bins=$(echo "scale=0; $rdf_r_cut / $bin_width" | bc)
+
+# Write file with parameters for weighted RDF:
+echo "collated_rdf.temp collated_iter_ener.temp $n_walkers $n_rdf_bins $start_temp $num_temp $delta_temp $boltz_const " >> w_rdf_param.temp
+
+echo "Calculating weighted"
+./NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
+
+
+
+# Clean up
 mv *.qw4 qw46
 mv *.qw6 qw46
 mv *.idx qw46
 rm *_temp
-rm foo
-mv qw4_$1.traj.*.extxyz qw46
-mv qw6_$1.traj.*.extxyz qw46
+rm foo collated_rdf.temp collated_iter_ener.temp collated_iter.temp collated_ener.temp w_rdf_param.temp
+mv qw4_$prefix.traj.*.extxyz qw46
+mv qw6_$prefix.traj.*.extxyz qw46
 mv allrdf.*.out rdf
+
