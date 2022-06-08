@@ -2,6 +2,7 @@
 
 source qw_traj.input
 
+gfortran NS_weighted_rdf.f95 -o NS_weighted_rdf.exe
 
 mkdir qw46
 mkdir rdf
@@ -14,7 +15,6 @@ ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -
 
 echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > $prefix-$proc_start-$proc_end.qw46HV
 
-#expr "$proc_end" - "$proc_start" + 1 >> nw.dat
 for iter in $(seq "$proc_start" "$proc_end")
 do
   echo $prefix.traj.$iter.extxyz >> nw.dat
@@ -45,11 +45,9 @@ do
 	rdf xyzfile=$prefix.traj.$iter.extxyz datafile=foo mask1="$atom_type" mask2="$atom_type" r_cut=$rdf_r_cut bin_width="$bin_width"
 
   # Collate files for weighted RDF
-  echo "Now catting"
 	cat allrdf.out >> collated_rdf.temp
 	cat "$prefix"_"$iter"_ener_temp >> collated_ener.temp
 	cat "$prefix"_"$iter"_iter_temp >> collated_iter.temp
-	echo "finished catting"
 
 	mv allrdf.out  allrdf.$iter.out
 
@@ -75,7 +73,7 @@ n_rdf_bins=$(echo "scale=0; $rdf_r_cut / $bin_width" | bc)
 # Write file with parameters for weighted RDF:
 echo "collated_rdf.temp collated_iter_ener.temp $n_walkers $n_rdf_bins $start_temp $num_temp $delta_temp $boltz_const " >> w_rdf_param.temp
 
-echo "Calculating weighted"
+echo "Calculating weighted RDF"
 ./NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
 
 

@@ -15,8 +15,10 @@ delta_temp=25       # Difference between temperatures
 
 # Uncomment the correct boltzmann constant
 
-#boltz_const=$(echo 1.380649*10^23  | bc)  # Boltzmann constant  J/K
-boltz_const=1.0
+#boltz_const=$(echo 1.380649*10^23  | bc)  #   J/K
+#boltz_const=$(echo 8.617385*10^-5  | bc)  #   eV/K
+#boltz_const=$(echo 6.3336374823584*10^-6  | bc)  #   Rydberg/K
+boltz_const=1.0                            #   LJ unit
 
 
 # Calculating RDF parameters:

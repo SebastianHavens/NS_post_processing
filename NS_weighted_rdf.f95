@@ -3,7 +3,6 @@ program weighted_rdf
  implicit none
 
  integer, parameter :: dp = kind(0.0q0)
-
  real(dp), allocatable, dimension(:)    :: temperature, beta, bin, rdf, Z
  real(dp), allocatable, dimension(:,:)  :: SUM_rdf
 
@@ -24,7 +23,7 @@ program weighted_rdf
  do i = 2,N_temp
     temperature(i) = temperature(i-1) + delta_temp
  enddo
- beta = 1.0_dp / (BOLTZMANN_K*temperature)
+ beta = 1.0_dp / (k_B*temperature)
 
  allocate (bin(N_bin_rdf), rdf(N_bin_rdf))
 
