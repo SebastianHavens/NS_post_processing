@@ -74,6 +74,7 @@ n_rdf_bins=$(echo "scale=0; $rdf_r_cut / $bin_width" | bc)
 echo "collated_rdf.temp collated_iter_ener.temp $n_walkers $n_rdf_bins $start_temp $num_temp $delta_temp $boltz_const " >> w_rdf_param.temp
 
 echo "Calculating weighted RDF"
+rm w_rdf.out
 ./NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
 
 
