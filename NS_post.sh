@@ -16,31 +16,31 @@ ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -
 
 
 
-echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > $prefix-"$proc_start"-"$proc_end".qw46HV
+echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > "$prefix".qw46HV
 
 for iter in $(seq "$proc_start" "$proc_end")
 do
 	echo 'Processor number:'  "$iter"
-	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=4 calc_QWave=T print_QWxyz=T  > $prefix.traj."$iter".qw4
-	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=6 calc_QWave=T print_QWxyz=T > $prefix.traj."$iter".qw6
+	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=4 calc_QWave=T print_QWxyz=T  > "$prefix"_"$iter".qw4
+	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=6 calc_QWave=T print_QWxyz=T > "$prefix"_"$iter".qw6
 	
 	#Extract data lines from QW output
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix".traj."$iter".qw4 > "$prefix"."$iter".qw4.temp
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix".traj."$iter".qw6 > "$prefix"."$iter".qw6.temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix"_"$iter".qw4 > "$prefix"_"$iter"_qw4.temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix"_"$iter".qw6 > "$prefix"_"$iter"_qw6.temp
 	
-	tail -n+12 "$prefix".traj."$iter".qw4 | head -n-3 > "$prefix".qw4.temp
-	tail -n+12 "$prefix".traj."$iter".qw6 | head -n-3 > "$prefix".qw6.temp
+	tail -n+12 "$prefix"_"$iter".qw4 | head -n-3 > "$prefix"_qw4.temp
+	tail -n+12 "$prefix"_"$iter".qw6 | head -n-3 > "$prefix"_qw6.temp
 	
 	# grep the energies, ke,  volumes and iteration numbers from the traj files in neat columns and creat temporary files:
 	grep -o "ns_energy=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_energy=//g" >> "$prefix"_"$iter"_ener.temp
-	grep -o "volume=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/volume=//g" >> "$prefix"."$iter".vol.temp
+	grep -o "volume=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/volume=//g" >> "$prefix"_"$iter"_vol.temp
 	grep -o "iter=.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/iter=//g" >> "$prefix"_"$iter"_iter.temp
 	grep -o "ns_KE=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_KE=//g" >> "$prefix"_"$iter"_ke.temp
 
 	H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener.temp "$prefix"_"$iter"_ke.temp
 	
 	#grep the energies, volume, Q and W data from the two files and create a summary result file, neatly arranging them by columns
-	pr -m -t -s "$prefix"_"$iter"_ener.temp "$prefix"."$iter".vol.temp "$prefix"."$iter".qw4.temp "$prefix"."$iter".qw6.temp "$prefix"_"$iter"_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> $prefix-$proc_start-$proc_end.qw46HV
+	pr -m -t -s "$prefix"_"$iter"_ener.temp "$prefix"_"$iter"_vol.temp "$prefix"_"$iter"_qw4.temp "$prefix"_"$iter"_qw6.temp "$prefix"_"$iter"_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> "$prefix".qw46HV
 
 
 
@@ -52,7 +52,7 @@ do
 	cat "$prefix"_"$iter"_iter.temp >> collated_iter.temp
   mv allrdf.out  allrdf."$iter".out
 
-	# remove the temporary files
+	# remove the temporary files produced by H_T_extrapolate.py
 	rm temp.temp
 	rm U.temp
 
