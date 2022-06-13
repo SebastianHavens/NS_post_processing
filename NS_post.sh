@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source NS_post.input
+source ./NS_post.input
 
 gfortran NS_weighted_rdf.f95 -o NS_weighted_rdf.exe
 
