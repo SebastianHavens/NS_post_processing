@@ -1,0 +1,28 @@
+# input file for NS_post.sh
+
+
+# Selecting which files to use:
+
+prefix='J_3E-2-K1_-1E-5-K2_-1E-6-B_1E-2_0_1_1-W_840'       # what comes before .traj. in your nested sampling output scripts
+proc_start=0        # This is the number of the processor output you want to analyse first
+proc_end=27          # Last processor you want to analyse
+
+# Choosing ns_analyse parameters:
+
+start_temp=0.001      # Start temperature
+num_temp=10000        # Number of temperatures
+delta_temp=0.0001       # Difference between temperatures
+
+# Uncomment the correct boltzmann constant
+
+#boltz_const=$(echo 1.380649*10^23  | bc -l)  #   J/K
+boltz_const=$(echo 8.617385*10^-5  | bc -l)  #   eV/K
+#boltz_const=$(echo 6.3336374823584*10^-6  | bc -l)  #   Rydberg/K
+#boltz_const=1.0                            #   LJ unit
+
+
+# Calculating RDF parameters:
+
+#atom_type='C'      # Atom type you want to calculate the RDF, use elemental symbol.
+#rdf_r_cut=4.0       # RDF cutoff distance
+#bin_width=0.02      # Width of bins used to calculate the RDF
