@@ -35,7 +35,7 @@ do
 	grep -o "iter=.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/iter=//g" >> "$prefix"_"$iter"_iter_temp
 	grep -o "ns_KE=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_KE=//g" >> "$prefix"_"$iter"_ke_temp
 
-	./H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener_temp "$prefix"_"$iter"_ke_temp
+	H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener_temp "$prefix"_"$iter"_ke_temp
 	
 	#grep the energies, volume, Q and W data from the two files and create a summary result file, neatly arranging them by columns
 	pr -m -t -s $prefix_$iter_ener_temp $prefix.$iter.vol_temp $prefix.qw4_temp $prefix.qw6_temp $prefix_$iter_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> $prefix-$proc_start-$proc_end.qw46HV
@@ -75,7 +75,7 @@ echo "collated_rdf.temp collated_iter_ener.temp $n_walkers $n_rdf_bins $start_te
 
 echo "Calculating weighted RDF"
 rm w_rdf.out
-./NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
+NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
 
 
 
