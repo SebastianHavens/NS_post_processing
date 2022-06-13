@@ -2,7 +2,9 @@
 
 source ./NS_post.input
 
-gfortran NS_weighted_rdf.f95 -o NS_weighted_rdf.exe
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
+
+gfortran $SCRIPT_DIR/NS_weighted_rdf.f95 -o $SCRIPT_DIR/NS_weighted_rdf.exe
 
 mkdir qw46
 mkdir rdf
