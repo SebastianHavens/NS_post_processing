@@ -2,13 +2,14 @@
 
 source ./NS_post.input
 
+cat ./NS_post.input >> NS_post.out
 
 # Finds fortran files and compiles them if they haven't already been compiled.
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
 gfortran "$SCRIPT_DIR"/NS_weighted_rdf.f95 -o "$SCRIPT_DIR"/NS_weighted_rdf.exe
 
-mkdir qw46
-mkdir rdf
+mkdir -p qw46
+mkdir -p rdf 
 
 
 
@@ -44,7 +45,7 @@ do
 
 
 
-	rdf xyzfile="$prefix".traj."$iter".extxyz datafile=foo.temp mask1="$atom_type" mask2="$atom_type" r_cut="$rdf_r_cut" bin_width="$bin_width" >> NS_post.out
+	rdf xyzfile="$prefix".traj."$iter".extxyz datafile=foo.temp mask1="$atom_type" mask2="$atom_type" r_cut="$rdf_r_cut" bin_width="$bin_width" >> /dev/null
 
   # Collate files for weighted RDF
 	cat allrdf.out >> collated_rdf.temp
@@ -73,7 +74,7 @@ n_rdf_bins=$(echo "scale=0; $rdf_r_cut / $bin_width" | bc)
 echo "collated_rdf.temp collated_iter_ener.temp $n_walkers $n_rdf_bins $start_temp $num_temp $delta_temp $boltz_const " >> w_rdf_param.temp
 
 echo "Calculating weighted RDF"
-rm w_rdf.out
+rm -f w_rdf.out >> NS_post.out
 NS_weighted_rdf.exe < w_rdf_param.temp >> w_rdf.out
 
 
