@@ -2,9 +2,10 @@
 
 source ./NS_post.input
 
-SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
 
-gfortran $SCRIPT_DIR/NS_weighted_rdf.f95 -o $SCRIPT_DIR/NS_weighted_rdf.exe
+# Finds fortran files and compiles them if they haven't already been compiled.
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
+gfortran "$SCRIPT_DIR"/NS_weighted_rdf.f95 -o "$SCRIPT_DIR"/NS_weighted_rdf.exe
 
 mkdir qw46
 mkdir rdf
@@ -15,21 +16,20 @@ ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -
 
 
 
-echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > $prefix-$proc_start-$proc_end.qw46HV
+echo 'Energy:    Volume:    q4: :q     w4:    q6:    w6:  iteration:   Temp:  U:' > $prefix-"$proc_start"-"$proc_end".qw46HV
 
 for iter in $(seq "$proc_start" "$proc_end")
 do
-  echo $prefix.traj.$iter.extxyz >> nw.dat
-	echo 'Processor number:'  $iter
-	get_qw atfile_in=$prefix.traj.$iter.extxyz r_cut=3 l=4 calc_QWave=T print_QWxyz=T  > $prefix.traj.$iter.qw4
-	get_qw atfile_in=$prefix.traj.$iter.extxyz r_cut=3 l=6 calc_QWave=T print_QWxyz=T > $prefix.traj.$iter.qw6
+	echo 'Processor number:'  "$iter"
+	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=4 calc_QWave=T print_QWxyz=T  > $prefix.traj."$iter".qw4
+	get_qw atfile_in=$prefix.traj."$iter".extxyz r_cut="$qw_r_cut" l=6 calc_QWave=T print_QWxyz=T > $prefix.traj."$iter".qw6
 	
 	#Extract data lines from QW output
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $prefix.traj.$iter.qw4 > $prefix.qw4_temp
-	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" $prefix.traj.$iter.qw6 > $prefix.qw6_temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix".traj."$iter".qw4 > "$prefix".qw4_temp
+	grep "[[:digit:]]\.[[:digit:]].*[[:digit:]]\.[[:digit:]]" "$prefix".traj."$iter".qw6 > "$prefix".qw6_temp
 	
-	tail -n+12 $prefix.traj.$iter.qw4 | head -n-3 > $prefix.qw4_temp
-	tail -n+12 $prefix.traj.$iter.qw6 | head -n-3 > $prefix.qw6_temp
+	tail -n+12 "$prefix".traj."$iter".qw4 | head -n-3 > "$prefix".qw4_temp
+	tail -n+12 "$prefix".traj."$iter".qw6 | head -n-3 > "$prefix".qw6_temp
 	
 	# grep the energies, ke,  volumes and iteration numbers from the traj files in neat columns and creat temporary files:
 	grep -o "ns_energy=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_energy=//g" >> "$prefix"_"$iter"_ener_temp
@@ -40,18 +40,18 @@ do
 	H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener_temp "$prefix"_"$iter"_ke_temp
 	
 	#grep the energies, volume, Q and W data from the two files and create a summary result file, neatly arranging them by columns
-	pr -m -t -s $prefix_$iter_ener_temp $prefix.$iter.vol_temp $prefix.qw4_temp $prefix.qw6_temp $prefix_$iter_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> $prefix-$proc_start-$proc_end.qw46HV
+	pr -m -t -s "$prefix"_"$iter"_ener_temp "$prefix"."$iter".vol_temp "$prefix".qw4_temp "$prefix".qw6_temp "$prefix"_"$iter"_iter.temp temp.temp U.temp| awk '{print $prefix,$proc_start,$proc_end,$start_temp,$num_temp,$delta_temp,$7,$8, $9 }' >> $prefix-$proc_start-$proc_end.qw46HV
 
 
 
-	rdf xyzfile=$prefix.traj.$iter.extxyz datafile=foo mask1="$atom_type" mask2="$atom_type" r_cut=$rdf_r_cut bin_width="$bin_width"
+	rdf xyzfile="$prefix".traj."$iter".extxyz datafile=foo mask1="$atom_type" mask2="$atom_type" r_cut="$rdf_r_cut" bin_width="$bin_width" >> NS_post.out
 
   # Collate files for weighted RDF
 	cat allrdf.out >> collated_rdf.temp
 	cat "$prefix"_"$iter"_ener_temp >> collated_ener.temp
 	cat "$prefix"_"$iter"_iter_temp >> collated_iter.temp
 
-	mv allrdf.out  allrdf.$iter.out
+	mv allrdf.out  allrdf."$iter".out
 
 	# remove the temporary files
 	rm $prefix.qw4_temp
@@ -67,7 +67,7 @@ paste collated_iter.temp collated_ener.temp > collated_iter_ener.temp
 
 
 # Grabs the first word of the first line of the energies file - the number of walkers
-n_walkers=$(cut -d' ' -f1 $prefix.energies | head -1)
+n_walkers=$(cut -d' ' -f1 "$prefix".energies | head -1)
 
 # Calculate number of RDF bins
 n_rdf_bins=$(echo "scale=0; $rdf_r_cut / $bin_width" | bc)

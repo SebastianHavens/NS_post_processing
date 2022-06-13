@@ -26,3 +26,7 @@ boltz_const=1.0                            #   LJ unit
 atom_type='Cu'      # Atom type you want to calculate the RDF, use elemental symbol.
 rdf_r_cut=4.0       # RDF cutoff distance
 bin_width=0.02      # Width of bins used to calculate the RDF
+
+# Calculating QW parameters:
+
+qw_r_cut=3.0
