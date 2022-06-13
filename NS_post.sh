@@ -34,7 +34,7 @@ do
 	# grep the energies, ke,  volumes and iteration numbers from the traj files in neat columns and creat temporary files:
 	grep -o "ns_energy=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_energy=//g" >> "$prefix"_"$iter"_ener_temp
 	grep -o "volume=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/volume=//g" >> "$prefix"."$iter".vol_temp
-	grep -o "iter=.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/iter=//g" >> "$prefix"_"$iter"_iter_temp
+	grep -o "iter=.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/iter=//g" >> "$prefix"_"$iter"_iter.temp
 	grep -o "ns_KE=.[[:digit:]]*\.[[:digit:]]*" "$prefix".traj."$iter".extxyz | sed "s/ns_KE=//g" >> "$prefix"_"$iter"_ke_temp
 
 	H_T_extrapolate.py analyse.dat "$prefix"_"$iter"_ener_temp "$prefix"_"$iter"_ke_temp
@@ -49,7 +49,7 @@ do
   # Collate files for weighted RDF
 	cat allrdf.out >> collated_rdf.temp
 	cat "$prefix"_"$iter"_ener_temp >> collated_ener.temp
-	cat "$prefix"_"$iter"_iter_temp >> collated_iter.temp
+	cat "$prefix"_"$iter"_iter.temp >> collated_iter.temp
 
 	mv allrdf.out  allrdf."$iter".out
 
