@@ -13,7 +13,7 @@ mkdir -p rdf
 
 
 
-ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -k "$boltz_const" > analyse.dat
+ns_analyse "$prefix".energies -M "$start_temp" -n "$num_temp" -D "$delta_temp" -k "$boltz_const" -i 10> analyse.dat
 
 
 
